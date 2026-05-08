@@ -1,14 +1,14 @@
 ### Requirements:
-1- Image Processing Toolbox
-2- extract "vlfeat-0.9.21-bin.tar" (already extracted in repo, kept for reference)
+1. Image Processing Toolbox
+2. extract "vlfeat-0.9.21-bin.tar" from compressed folder
 
 ### Files:
-1- vlfeat-0.9.21-bin/vlfeat-0.9.21 (SIFT Library)
-2- vlfeat-0.9.21-bin.tar.gz (SIFT Library)
-3- dormPic1
-4- dormPic2
-5- homographyRansac.m (function file)
-6- main.m (main)
+1. vlfeat-0.9.21-bin/vlfeat-0.9.21 (SIFT Library)
+2. vlfeat-0.9.21-bin.tar.gz (SIFT Library)
+3. dormPic1
+4. dormPic2
+5. homographyRansac.m (function file)
+6. main.m (main)
 
 ### Description:
 This program takes in two images (dormPic1 and dormPic2) and uses SIFT to locate and create descriptors for interest interest points.
