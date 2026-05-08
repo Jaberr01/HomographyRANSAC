@@ -7,8 +7,6 @@ function [Ioutput,tform_1_2, indices, rmsErr] = homographyRansac(...
     RANSACDistanceThreshold ... %ransac distance threshold
    )
 
-
-
 tform_1_2 = [];
 indices = [];
 rmsErr = [];
@@ -42,8 +40,10 @@ nIterations = log(1-Ps)/(log(1-p));
 fprintf('Initial estimated number of iterations needed: %d\n', nIterations);
 pause
 pBest = -Inf;       % Best probability found so far (actually, the log)
+
 for sample_count = 1:1:nIterations
     if sample_count>maxIterations
+        disp("breaking")
         break;
     end
     
@@ -52,15 +52,15 @@ for sample_count = 1:1:nIterations
     idx = randperm(N);
     p1 = pts1(:,idx(1:4)); % size is [2,4]
     p2 = pts2(:,idx(1:4)); % size is [2,4]
-    
+
     try
-        tform_1_2 = fitgeotrans(p1',p2' ,'projective');
+        tform_1_2 = fitgeotrans(p1',p2','projective');
     catch
         continue;
     end
+
     warning('on', 'all');
-    
-   
+      
     % Use that homography to transform all pts1 to pts2
     pts2map = transformPointsForward(tform_1_2, pts1');
     size(pts2map)
@@ -72,12 +72,9 @@ for sample_count = 1:1:nIterations
     numerator = exp(-rsq/2);   
     denominator = 2*pi*sigs(1,:).*sigs(2,:);    
     pInlier = numerator./denominator;
-    
-    
 
     indicesInliers = (pInlier > pOutlier);
-
-
+    disp(indicesInliers)
     nInlier = sum(indicesInliers);
 
         
@@ -140,7 +137,10 @@ for sample_count = 1:1:nIterations
 end
     
 fprintf('Final number of iterations used: %d\n', sample_count);
+
+
 if sum(indices) < 4
+    disp("couldnt find a fit")
     return      % Couldn't find a fit
 end
 fprintf('Final calculated inlier fraction: %f\n', inlierFraction);
@@ -150,28 +150,28 @@ p1 = pts1(:,indices);
 p2 = pts2(:,indices);
 
 % Show inliers
-        if ~isempty(I1) && ~isempty(I2)
-            figure(100), title('yellow is inliers, blue is outliers'),imshow([I1,I2],[]);
-            o = size(I1,2) ;
-            for i=1:size(pts1,2)
-                x1 = pts1(1,i);
-                y1 = pts1(2,i);
-                x2 = pts2(1,i);
-                y2 = pts2(2,i);
-                
-                if indices(i)
-                    text(x1,y1,sprintf('%d',i), 'Color', 'y');
-                    text(x2+o,y2,sprintf('%d',i), 'Color', 'y');
-                    line([x1;x2+o], [y1;y2],'Color','red') ;
-                else
-                    text(x1,y1,sprintf('%d',i), 'Color', 'b');
-                    text(x2+o,y2,sprintf('%d',i), 'Color', 'b');   
-                end                              
-            end
-        end
+if ~isempty(I1) && ~isempty(I2)
+    figure(100), title('yellow is inliers, blue is outliers'),imshow([I1,I2],[]);
+    o = size(I1,2) ;
+    for i=1:size(pts1,2)
+        x1 = pts1(1,i);
+        y1 = pts1(2,i);
+        x2 = pts2(1,i);
+        y2 = pts2(2,i);
+        
+        if indices(i)
+            text(x1,y1,sprintf('%d',i), 'Color', 'y');
+            text(x2+o,y2,sprintf('%d',i), 'Color', 'y');
+            line([x1;x2+o], [y1;y2],'Color','red') ;
+        else
+            text(x1,y1,sprintf('%d',i), 'Color', 'b');
+            text(x2+o,y2,sprintf('%d',i), 'Color', 'b');   
+        end                              
+    end
+end
 
 
-        tform_1_2 = fitgeotrans(p1',p2' ,'projective');  
+tform_1_2 = fitgeotrans(p1',p2' ,'projective');  
 
 % applies the forward transformation of 2-D geometric transformation tform to
 % the points specified by p1'
@@ -185,22 +185,22 @@ rmsErr = sqrt( sum(rsq)/length(rsq) );
 disp('RMS error: '), disp(rmsErr);
 
 % Fuse the two images.
-        [H,W] = size(I1);
-        outputView = imref2d([H W*2],[-W W], [1 H]); 
-        Ioutput = imwarp(I1, tform_1_2,'OutputView',outputView);  % notice how we used the invert
+[H,W] = size(I1);
+outputView = imref2d([H W*2],[-W W], [1 H]); 
+Ioutput = imwarp(I1, tform_1_2,'OutputView',outputView);  % notice how we used the invert
 
-        % average overlapping values to blend image
-        for i=1:H
-           for j=1:W
-              if(Ioutput(i,j+W) > 0)
-                 Ioutput(i,j+W) = (I2(i,j) + out(i,j+W))/2;
-              else
-                  Ioutput(i,j+W) = I2(i,j);
-              end
-           end
-        end
-        %figure; imshow(Ioutput, []);
+% average overlapping values to blend image
+for i=1:H
+   for j=1:W
+      if(Ioutput(i,j+W) > 0)
+         Ioutput(i,j+W) = (I2(i,j) + out(i,j+W))/2;
+      else
+          Ioutput(i,j+W) = I2(i,j);
+      end
+   end
+end
+figure; imshow(Ioutput, []);
 
-%figure(40), imshow(Ioutput, []);
+figure(40), imshow(Ioutput, []);
 
 return

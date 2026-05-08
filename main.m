@@ -10,7 +10,7 @@ imshow(im);
 % Define image file names.
 function [Ioutput] = runImages(im1,im2)
 
-run('vlfeat-0.9.21-bin\vlfeat-0.9.21\toolbox\vl_setup')
+run('vlfeat-0.9.21-bin\vlfeat-0.9.21\toolbox\vl_setup.m')
 % Get the first image.
 I1c = im1;
 
@@ -32,8 +32,8 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Extract SIFT features.
 % These parameters limit the number of features detected
-peak_thresh = 5;    % increase to limit; default is 0
-edge_thresh = 10;   % decrease to limit; default is 10
+peak_thresh = 8;    % increase to limit; default is 0
+edge_thresh = 5;   % decrease to limit; default is 10
 
 % First image
 I1 = single(I1);  % Convert to single precision floating point
@@ -73,7 +73,7 @@ set(h,'color','y','linewidth',1.0) ;
 % Define threshold for matching. Descriptor D1 is matched to a descriptor
 % D2 only if the distance d(D1,D2) multiplied by THRESH is not greater than
 % the distance of D1 to all other descriptors
-thresh = 7.0;   % default = 1.5; increase to limit matches
+thresh = 35;   % default = 1.5; increase to limit matches
 [matches, scores] = vl_ubcmatch(d1, d2, thresh);
 fprintf('Number of matching features: %d\n', size(matches,2));
 
@@ -126,7 +126,6 @@ confidence = 0.99;
     I1, I2, ...,      % for visualization (use [],[] if not needed)
     sigma ...
     );
-figure(40), imshow(Ioutput, []);
 
 end
 
